@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fruit Loop Rater</title>
+</head>
+<body>
+    <h1>🍓 Fruit Loop Rater</h1>
+    <p>Hello, {{ name.upper() }}!</p>
+
+    <h2>Today's fruits</h2>
+    <ul>
+        {% for fruit in fruits %}
+                <li>
+        {{ fruit["emoji"] }} {{ fruit["name"] }}
+        <form method="POST" action="/rate" style="display:inline">
+            <input type="hidden" name="fruit_id" value="{{ fruit['id'] }}">
+            <select name="score">
+                <option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option>
+            </select>
+            <button type="submit">Rate</button>
+        </form>
+    </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
