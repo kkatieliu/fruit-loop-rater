@@ -16,21 +16,17 @@
         {% for fruit in fruits %}
                 <li>
         <a href="/fruit/{{ fruit['id'] }}">{{ fruit["emoji"] }} {{ fruit["name"] }}</a>
-        {% if fruit["avg_score"] %}
-            — {{ fruit["avg_score"] }}⭐ ({{ fruit["num_ratings"] }} ratings)
+        {% if fruit["avg_overall"] %}
+            — {{ fruit["avg_overall"] }}/10 overall
+            · 🍬 {{ fruit["avg_sweetness"] }}/10
+            · 💧 {{ fruit["avg_juiciness"] }}/10
+            <small>({{ fruit["num_ratings"] }} ratings)</small>
         {% else %}
             — no ratings yet
         {% endif %}
 
         {% if username %}
-            <form method="POST" action="/rate" style="display:inline">
-                <input type="hidden" name="fruit_id" value="{{ fruit['id'] }}">
-                <select name="score">
-                    <option>1</option><option>2</option><option>3</option>
-                    <option>4</option><option>5</option>
-                </select>
-                <button type="submit">Rate</button>
-            </form>
+            <a href="/rate/{{ fruit['id'] }}">Rate this</a>
         {% endif %}
 
     </li>

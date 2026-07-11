@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rate {{ fruit["name"] }} — Fruit Loop Rater</title>
+</head>
+<body>
+    <h1>Rate {{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
+
+    <form method="POST">
+        <label>Which Costco?
+            <select name="location_id" required>
+                {% for loc in locations %}
+                    <option value="{{ loc['id'] }}"
+                        {% if loc['id'] == last_location_id %}selected{% endif %}>
+                        {{ loc["nickname"] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+        <br><br>
+
+        <label>Sour ↔ Sweet (1 = very sour, 10 = very sweet)
+            <input type="range" name="sweetness" min="1" max="10" value="5"
+                   oninput="this.nextElementSibling.textContent = this.value">
+            <output>5</output>
+        </label>
+        <br><br>
+
+        <label>Dry ↔ Juicy (1 = very dry, 10 = very juicy)
+            <input type="range" name="juiciness" min="1" max="10" value="5"
+                   oninput="this.nextElementSibling.textContent = this.value">
+            <output>5</output>
+        </label>
+        <br><br>
+
+        <label>Overall quality (1 = terrible, 10 = amazing)
+            <input type="range" name="overall" min="1" max="10" value="5"
+                   oninput="this.nextElementSibling.textContent = this.value">
+            <output>5</output>
+        </label>
+        <br><br>
+
+        <label>Purchased on:
+            <input type="date" name="purchase_date" value="{{ today }}" required>
+        </label>
+        <br><br>
+
+        <label>Consumed on:
+            <input type="date" name="consumed_date" value="{{ today }}" required>
+        </label>
+        <br><br>
+
+        <button type="submit">Save rating</button>
+    </form>
+
+    <p><a href="/fruit/{{ fruit['id'] }}">← Back to {{ fruit["name"] }}</a></p>
+</body>
+</html>

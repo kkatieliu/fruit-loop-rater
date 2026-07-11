@@ -6,13 +6,27 @@
 <body>
     <h1>{{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
 
-    <h2>Ratings</h2>
-    {% if ratings %}
-        <ul>
-        {% for r in ratings %}
-            <li>{{ r["score"] }}⭐ <small>({{ r["created_at"] | prettydate }})</small></li>
-        {% endfor %}
-        </ul>
+    {% if averages["num_ratings"] > 0 %}
+        <p>
+            <strong>{{ averages["avg_overall"] }}/10 overall</strong>
+            · 🍬 Sweetness {{ averages["avg_sweetness"] }}/10
+            · 💧 Juiciness {{ averages["avg_juiciness"] }}/10
+            <small>({{ averages["num_ratings"] }} ratings)</small>
+        </p>
+
+        <details>
+            <summary>See individual ratings</summary>
+            <ul>
+            {% for r in ratings %}
+                <li>
+                    {{ r["overall"] }}/10 overall · 🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }}
+                    — {{ r["location"] }}
+                    <small>(bought {{ r["purchase_date"] | prettydate }},
+                           eaten {{ r["consumed_date"] | prettydate }})</small>
+                </li>
+            {% endfor %}
+            </ul>
+        </details>
     {% else %}
         <p>No ratings yet — be the first!</p>
     {% endif %}
