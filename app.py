@@ -1,10 +1,18 @@
+from datetime import datetime
 import sqlite3
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime   # add to the imports at the top of the file
 
 app = Flask(__name__)
 # dont allow anyone to change the cookie in production and pretend they are another user
 app.secret_key = "dev-only-change-me" 
+
+
+@app.template_filter("prettydate")
+def prettydate(value):
+    dt = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+    return dt.strftime("%B %-d, %Y")
 
 
 def get_db():
@@ -105,3 +113,24 @@ def login():
 def logout():
     session.clear()
     return redirect("/")
+
+@app.route("/fruit/<int:fruit_id>")
+def fruit_detail(fruit_id):
+    db = get_db()
+    fruit = db.execute(
+        "SELECT * FROM fruits WHERE id = ?", (fruit_id,)
+    ).fetchone()
+
+    if fruit is None:
+        db.close()
+        return "Fruit not found", 404
+
+    ratings = db.execute(
+        """SELECT score, created_at
+           FROM ratings
+           WHERE fruit_id = ?
+           ORDER BY created_at DESC""",
+        (fruit_id,),
+    ).fetchall()
+    db.close()
+    return render_template("fruit.html", fruit=fruit, ratings=ratings)

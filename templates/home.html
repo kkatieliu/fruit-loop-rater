@@ -15,7 +15,7 @@
     <ul>
         {% for fruit in fruits %}
                 <li>
-        {{ fruit["emoji"] }} {{ fruit["name"] }}
+        <a href="/fruit/{{ fruit['id'] }}">{{ fruit["emoji"] }} {{ fruit["name"] }}</a>
         {% if fruit["avg_score"] %}
             — {{ fruit["avg_score"] }}⭐ ({{ fruit["num_ratings"] }} ratings)
         {% else %}

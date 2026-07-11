@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ fruit["name"] }} — Fruit Loop Rater</title>
+</head>
+<body>
+    <h1>{{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
+
+    <h2>Ratings</h2>
+    {% if ratings %}
+        <ul>
+        {% for r in ratings %}
+            <li>{{ r["score"] }}⭐ <small>({{ r["created_at"] | prettydate }})</small></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No ratings yet — be the first!</p>
+    {% endif %}
+
+    <p><a href="/">← Back to all fruits</a></p>
+</body>
+</html>
