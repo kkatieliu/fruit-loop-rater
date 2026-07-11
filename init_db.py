@@ -44,7 +44,7 @@ connection.executescript("""
         juiciness INTEGER NOT NULL CHECK (juiciness BETWEEN 1 AND 10),
         overall INTEGER NOT NULL CHECK (overall BETWEEN 1 AND 10),
         purchase_date DATE NOT NULL,
-        consumed_date DATE NOT NULL,
+        consumed_date DATE NOT NULL CHECK (consumed_date >= purchase_date),
         week_start DATE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (user_id, fruit_id, location_id, week_start)

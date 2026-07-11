@@ -8,18 +8,48 @@
 
     {% if averages["num_ratings"] > 0 %}
         <p>
-            <strong>{{ averages["avg_overall"] }}/10 overall</strong>
-            · 🍬 Sweetness {{ averages["avg_sweetness"] }}/10
-            · 💧 Juiciness {{ averages["avg_juiciness"] }}/10
+            <strong>{{ averages["avg_overall"] }}/10 overall satisfaction</strong>
+            | 🍬 Sweetness {{ averages["avg_sweetness"] }}/10
+            | 💧 Juiciness {{ averages["avg_juiciness"] }}/10
             <small>({{ averages["num_ratings"] }} ratings)</small>
         </p>
 
         <details>
+
+            <h2>Week by week</h2>
+            <table border="1" cellpadding="6">
+                <tr>
+                    <th>Week of</th>
+                    <th>Everyone</th>
+                    <th>You</th>
+                    <th>Ratings</th>
+                </tr>
+                {% for w in weekly %}
+                {% set mine = my_weekly.get(w["week_start"]) %}
+                <tr>
+                    <td>{{ w["week_start"] | prettydate }}</td>
+                    <td>
+                        <strong>{{ w["avg_overall"] }}/10</strong>
+                        | 🍬 {{ w["avg_sweetness"] }} | 💧 {{ w["avg_juiciness"] }}
+                    </td>
+                    <td>
+                        {% if mine %}
+                            <strong>{{ mine["overall"] }}/10</strong>
+                            | 🍬 {{ mine["sweetness"] }} | 💧 {{ mine["juiciness"] }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>{{ w["num_ratings"] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
             <summary>See individual ratings</summary>
             <ul>
             {% for r in ratings %}
                 <li>
-                    {{ r["overall"] }}/10 overall · 🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }}
+                    {{ r["overall"] }}/10 overall satisfaction | 🍬 {{ r["sweetness"] }} | 💧 {{ r["juiciness"] }}
                     — {{ r["location"] }}
                     <small>(bought {{ r["purchase_date"] | prettydate }},
                            eaten {{ r["consumed_date"] | prettydate }})</small>

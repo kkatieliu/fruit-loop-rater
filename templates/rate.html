@@ -6,6 +6,10 @@
 <body>
     <h1>Rate {{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
 
+    {% if error %}
+        <p style="color: red">{{ error }}</p>
+    {% endif %}
+
     <form method="POST">
         <label>Which Costco?
             <select name="location_id" required>
@@ -33,7 +37,7 @@
         </label>
         <br><br>
 
-        <label>Overall quality (1 = terrible, 10 = amazing)
+        <label>Overall satisfaction (1 = terrible, 10 = amazing)
             <input type="range" name="overall" min="1" max="10" value="5"
                    oninput="this.nextElementSibling.textContent = this.value">
             <output>5</output>

@@ -17,9 +17,9 @@
                 <li>
         <a href="/fruit/{{ fruit['id'] }}">{{ fruit["emoji"] }} {{ fruit["name"] }}</a>
         {% if fruit["avg_overall"] %}
-            — {{ fruit["avg_overall"] }}/10 overall
-            · 🍬 {{ fruit["avg_sweetness"] }}/10
-            · 💧 {{ fruit["avg_juiciness"] }}/10
+            — {{ fruit["avg_overall"] }}/10 overall satisfaction
+            | 🍬 {{ fruit["avg_sweetness"] }}/10
+            | 💧 {{ fruit["avg_juiciness"] }}/10
             <small>({{ fruit["num_ratings"] }} ratings)</small>
         {% else %}
             — no ratings yet

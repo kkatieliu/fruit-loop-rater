@@ -32,9 +32,9 @@ def home():
     
     fruits = db.execute("""
         SELECT f.id, f.name, f.emoji,
-               ROUND(AVG(r.overall), 1)   AS avg_overall,
-               ROUND(AVG(r.sweetness), 1) AS avg_sweetness,
-               ROUND(AVG(r.juiciness), 1) AS avg_juiciness,
+               CAST(ROUND(AVG(r.overall), 0) AS INTEGER)  AS avg_overall,
+               CAST(ROUND(AVG(r.sweetness), 0) AS INTEGER) AS avg_sweetness,
+               CAST(ROUND(AVG(r.juiciness), 0) AS INTEGER) AS avg_juiciness,
                COUNT(r.id) AS num_ratings
         FROM fruits f
         LEFT JOIN ratings r ON r.fruit_id = f.id
@@ -65,7 +65,20 @@ def rate(fruit_id):
         purchase_date = request.form["purchase_date"]
         consumed_date = request.form["consumed_date"]
 
+        purchased = date.fromisoformat(purchase_date)
         consumed = date.fromisoformat(consumed_date)
+
+        if consumed < purchased:
+            db.close()
+            return render_template(
+                "rate.html",
+                fruit=fruit,
+                locations=locations,
+                today=date.today().isoformat(),
+                last_location_id=session.get("last_location_id"),
+                error="Consumed date must be on or after the purchase date.",
+            )
+
         week_start = week_start_of(consumed)
 
         db.execute(
@@ -160,34 +173,63 @@ def logout():
 
 @app.route("/fruit/<int:fruit_id>")
 def fruit_detail(fruit_id):
-    db = get_db()
-    fruit = db.execute(
-        "SELECT * FROM fruits WHERE id = ?", (fruit_id,)
-    ).fetchone()
+    location_id = request.args.get("location", type=int)         
 
+    db = get_db()
+    fruit = db.execute("SELECT * FROM fruits WHERE id = ?", (fruit_id,)).fetchone()
     if fruit is None:
         db.close()
         return "Fruit not found", 404
 
+    locations = db.execute("SELECT * FROM locations ORDER BY nickname").fetchall()  
+
+    loc_filter = "AND location_id = ?" if location_id else ""    
+    loc_params = (location_id,) if location_id else ()           
+
     averages = db.execute(
-        """SELECT ROUND(AVG(overall), 1)   AS avg_overall,
-                  ROUND(AVG(sweetness), 1) AS avg_sweetness,
-                  ROUND(AVG(juiciness), 1) AS avg_juiciness,
-                  COUNT(id) AS num_ratings
-           FROM ratings WHERE fruit_id = ?""",
-        (fruit_id,),
+        f"""SELECT CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS avg_overall,
+                   CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
+                   CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
+                   COUNT(id) AS num_ratings
+            FROM ratings WHERE fruit_id = ? {loc_filter}""",
+        (fruit_id, *loc_params),
     ).fetchone()
 
     ratings = db.execute(
-        """SELECT r.sweetness, r.juiciness, r.overall,
-                  r.purchase_date, r.consumed_date,
-                  l.nickname AS location
-           FROM ratings r
-           JOIN locations l ON l.id = r.location_id
-           WHERE r.fruit_id = ?
-           ORDER BY r.consumed_date DESC""",
-        (fruit_id,),
+        f"""SELECT r.sweetness, r.juiciness, r.overall,
+                   r.purchase_date, r.consumed_date,
+                   l.nickname AS location
+            FROM ratings r
+            JOIN locations l ON l.id = r.location_id
+            WHERE r.fruit_id = ? {loc_filter}
+            ORDER BY r.consumed_date DESC""",
+        (fruit_id, *loc_params),
     ).fetchall()
+
+    weekly = db.execute(
+        f"""SELECT week_start,
+                   CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS avg_overall,
+                   CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
+                   CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
+                   COUNT(id) AS num_ratings
+            FROM ratings
+            WHERE fruit_id = ? {loc_filter}
+            GROUP BY week_start
+            ORDER BY week_start DESC""",
+        (fruit_id, *loc_params),
+    ).fetchall()
+
+    my_weekly = {}
+    if "user_id" in session:
+        rows = db.execute(
+            f"""SELECT week_start, sweetness, juiciness, overall
+                FROM ratings
+                WHERE fruit_id = ? AND user_id = ? {loc_filter}""",
+            (fruit_id, session["user_id"], *loc_params),
+        ).fetchall()
+        my_weekly = {r["week_start"]: r for r in rows}
+
     db.close()
-    return render_template("fruit.html", fruit=fruit, averages=averages, ratings=ratings)
-    
+    return render_template("fruit.html", fruit=fruit, averages=averages,
+                           ratings=ratings, weekly=weekly, my_weekly=my_weekly,
+                           locations=locations, selected_location=location_id)
