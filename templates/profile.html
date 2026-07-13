@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Profile — Fruit Loop Rater</title>
+</head>
+<body>
+    <h1>My Profile</h1>
+
+    <p>
+        {{ my_tier["emoji"] }} <strong>{{ my_tier["name"] }}</strong>
+        — {{ count }} rating{{ "s" if count != 1 }}
+        {% if next_tier_at %}
+            <small>({{ next_tier_at - count }} more to reach the next tier!)</small>
+        {% else %}
+            <small>(top tier — 👑 nothing left to climb!)</small>
+        {% endif %}
+    </p>
+
+    <h2>My ratings</h2>
+    {% if ratings %}
+        {% for location, weeks in by_location.items() %}
+            <h3>📍 {{ location }}</h3>
+            {% for week, week_ratings in weeks.items() %}
+                <h4>Week of {{ week | prettydate }}</h4>
+                <ul>
+                {% for r in week_ratings %}
+                    <li>
+                        <a href="/fruit/{{ r['fruit_id'] }}">{{ r["fruit_emoji"] }} {{ r["fruit_name"] }}</a>:
+                        {{ r["overall"] }}/10 overall satisfaction | 🍬 {{ r["sweetness"] }} | 💧 {{ r["juiciness"] }}
+                        <small>(bought {{ r["purchase_date"] | prettydate }},
+                               eaten {{ r["consumed_date"] | prettydate }})</small>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        <p>You haven't rated anything yet — <a href="/">pick a fruit</a> and get started! 🌱</p>
+    {% endif %}
+
+    <p><a href="/">← Back to all fruits</a></p>
+</body>
+</html>

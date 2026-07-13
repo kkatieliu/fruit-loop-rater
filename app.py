@@ -1,4 +1,3 @@
-from datetime import datetime
 import sqlite3
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -259,3 +258,42 @@ def fruit_detail(fruit_id):
                            ratings=ratings, weekly=weekly, my_weekly=my_weekly,
                            locations=locations, selected_location=location_id,
                            tier_for=tier_for)
+    
+@app.route("/profile")
+def profile():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    db = get_db()
+
+    my_ratings = db.execute(
+        """SELECT r.sweetness, r.juiciness, r.overall,
+                r.purchase_date, r.consumed_date, r.week_start,
+                f.name AS fruit_name, f.emoji AS fruit_emoji, f.id AS fruit_id,
+                l.nickname AS location
+        FROM ratings r
+        JOIN fruits f ON f.id = r.fruit_id
+        JOIN locations l ON l.id = r.location_id
+        WHERE r.user_id = ?
+        ORDER BY r.consumed_date DESC""",
+        (session["user_id"],),
+    ).fetchall()
+    
+    by_location = {}
+    for r in my_ratings:
+        loc = r["location"]
+        week = r["week_start"]
+        by_location.setdefault(loc, {}).setdefault(week, []).append(r)
+
+    count = len(my_ratings)
+    my_tier = tier_for(count)
+
+    next_tier_at = None
+    for threshold, _, _ in TIERS:
+        if count < threshold:
+            next_tier_at = threshold   # keep looking: we want the smallest one above count
+
+    db.close()
+    return render_template("profile.html", ratings=my_ratings,
+                        count=count, my_tier=my_tier,
+                        next_tier_at=next_tier_at, by_location=by_location)
