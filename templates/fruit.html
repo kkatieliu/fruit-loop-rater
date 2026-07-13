@@ -6,6 +6,22 @@
 <body>
     <h1>{{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
 
+    <p>
+        {% if selected_location %}
+            <a href="/fruit/{{ fruit['id'] }}">All Costcos</a>
+        {% else %}
+            <strong>All Costcos</strong>
+        {% endif %}
+        {% for loc in locations %}
+            ·
+            {% if loc["id"] == selected_location %}
+                <strong>{{ loc["nickname"] }}</strong>
+            {% else %}
+                <a href="/fruit/{{ fruit['id'] }}?location={{ loc['id'] }}">{{ loc["nickname"] }}</a>
+            {% endif %}
+        {% endfor %}
+    </p>
+
     {% if averages["num_ratings"] > 0 %}
         <p>
             <strong>{{ averages["avg_overall"] }}/10 overall satisfaction</strong>
@@ -15,36 +31,6 @@
         </p>
 
         <details>
-
-            <h2>Week by week</h2>
-            <table border="1" cellpadding="6">
-                <tr>
-                    <th>Week of</th>
-                    <th>Everyone</th>
-                    <th>You</th>
-                    <th>Ratings</th>
-                </tr>
-                {% for w in weekly %}
-                {% set mine = my_weekly.get(w["week_start"]) %}
-                <tr>
-                    <td>{{ w["week_start"] | prettydate }}</td>
-                    <td>
-                        <strong>{{ w["avg_overall"] }}/10</strong>
-                        | 🍬 {{ w["avg_sweetness"] }} | 💧 {{ w["avg_juiciness"] }}
-                    </td>
-                    <td>
-                        {% if mine %}
-                            <strong>{{ mine["overall"] }}/10</strong>
-                            | 🍬 {{ mine["sweetness"] }} | 💧 {{ mine["juiciness"] }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </td>
-                    <td>{{ w["num_ratings"] }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-
             <summary>See individual ratings</summary>
             <ul>
             {% for r in ratings %}
@@ -58,7 +44,40 @@
             </ul>
         </details>
     {% else %}
-        <p>No ratings yet — be the first!</p>
+        <p>No ratings yet — <a href="/rate/{{ fruit['id'] }}">be the first</a>!</p>
+    {% endif %}
+
+    <h2>Week by week</h2>
+    {% if weekly %}
+        <table border="1" cellpadding="6">
+            <tr>
+                <th>Week of</th>
+                <th>Everyone</th>
+                <th>You</th>
+                <th>Ratings</th>
+            </tr>
+            {% for w in weekly %}
+            {% set mine = my_weekly.get(w["week_start"]) %}
+            <tr>
+                <td>{{ w["week_start"] | prettydate }}</td>
+                <td>
+                    <strong>{{ w["avg_overall"] }}/10</strong>
+                    | 🍬 {{ w["avg_sweetness"] }} | 💧 {{ w["avg_juiciness"] }}
+                </td>
+                <td>
+                    {% if mine %}
+                        <strong>{{ mine["overall"] }}/10</strong>
+                        | 🍬 {{ mine["sweetness"] }} | 💧 {{ mine["juiciness"] }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>{{ w["num_ratings"] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No ratings here yet{% if selected_location %} for this Costco{% endif %} — <a href="/rate/{{ fruit['id'] }}">be the first to rate</a>!</p>
     {% endif %}
 
     <p><a href="/">← Back to all fruits</a></p>
