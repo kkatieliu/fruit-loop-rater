@@ -6,7 +6,8 @@
 <body>
     <h1>welcome to fruit loops :)</h1>
     {% if username %}
-        <p>Hello, {{ username }}! <a href="/logout">Log out</a></p>
+        <p>Hello, {{ username }} {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small>
+   — <a href="/logout">Log out</a></p>
     {% else %}
         <p><a href="/login">Log in</a> or <a href="/register">create an account</a></p>
     {% endif %}

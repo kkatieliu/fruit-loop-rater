@@ -15,6 +15,7 @@ connection.executescript("""
         ('Strawberries', '🍓'),
         ('Banana', '🍌'),
         ('Tomato', '🍅'),
+        ('Ogrange', '🍊'),
         ('Kiwi', '🥝');
 
     CREATE TABLE IF NOT EXISTS users (

@@ -35,8 +35,11 @@
             <ul>
             {% for r in ratings %}
                 <li>
+                    {% set tier = tier_for(r["rater_count"]) %}
+                    <span title="{{ tier['name'] }} rater">{{ tier["emoji"] }}</span>
                     {{ r["overall"] }}/10 overall satisfaction | 🍬 {{ r["sweetness"] }} | 💧 {{ r["juiciness"] }}
                     — {{ r["location"] }}
+                    
                     <small>(bought {{ r["purchase_date"] | prettydate }},
                            eaten {{ r["consumed_date"] | prettydate }})</small>
                 </li>

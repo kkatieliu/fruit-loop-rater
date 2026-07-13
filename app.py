@@ -8,6 +8,19 @@ from datetime import datetime, date, timedelta
 def week_start_of(d: date) -> date:
     return d - timedelta(days=d.weekday())
 
+TIERS = [
+    (75, "👑", "Tier 5 Rater"),
+    (35, "🌹", "Tier 4 Rater"),
+    (15, "🌸", "Tier 3 Rater"),
+    (5,  "🌿", "Tier 2 Rater"),
+    (0,  "🌱", "Tier 1 Rater"),
+]
+
+def tier_for(count):
+    for threshold, emoji, name in TIERS:
+        if count >= threshold:
+            return {"emoji": emoji, "name": name}
+
 app = Flask(__name__)
 # dont allow anyone to change the cookie in production and pretend they are another user
 app.secret_key = "dev-only-change-me" 
@@ -42,8 +55,18 @@ def home():
         ORDER BY avg_overall DESC
     """).fetchall()
     
+    
+    
+    my_tier = None
+    if "user_id" in session:
+        count = db.execute(
+            "SELECT COUNT(*) AS c FROM ratings WHERE user_id = ?",
+            (session["user_id"],),
+        ).fetchone()["c"]
+        my_tier = tier_for(count)
+        
     db.close()
-    return render_template("home.html", username=session.get("username"), fruits=fruits)
+    return render_template("home.html", username=session.get("username"), fruits=fruits, my_tier=my_tier)
 
 @app.route("/rate/<int:fruit_id>", methods=["GET", "POST"])
 def rate(fruit_id):
@@ -198,7 +221,9 @@ def fruit_detail(fruit_id):
     ratings = db.execute(
         f"""SELECT r.sweetness, r.juiciness, r.overall,
                    r.purchase_date, r.consumed_date,
-                   l.nickname AS location
+                   l.nickname AS location,
+                   (SELECT COUNT(*) FROM ratings r2
+                    WHERE r2.user_id = r.user_id) AS rater_count
             FROM ratings r
             JOIN locations l ON l.id = r.location_id
             WHERE r.fruit_id = ? {loc_filter}
@@ -232,4 +257,5 @@ def fruit_detail(fruit_id):
     db.close()
     return render_template("fruit.html", fruit=fruit, averages=averages,
                            ratings=ratings, weekly=weekly, my_weekly=my_weekly,
-                           locations=locations, selected_location=location_id)
+                           locations=locations, selected_location=location_id,
+                           tier_for=tier_for)
