@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register — Fruit Loop Rater</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Register: Fruit Loops{% endblock %}
+
+{% block content %}
     <h1>Create an account 🍓</h1>
     <p>Already have an account? <a href="/login">Log in</a></p>
 
@@ -24,5 +23,4 @@
     </form>
 
     <p><a href="/">← Back to fruits</a></p>
-</body>
-</html>
+{% endblock %}

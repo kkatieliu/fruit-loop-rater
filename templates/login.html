@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Log in — Fruit Loop Rater</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Log in: Fruit Loops{% endblock %}
+
+{% block content %}
     <h1>Log in 🍓</h1>
-    <p>No account yet? <a href="/register">Register here</a></p>
 
     {% if error %}
         <p style="color: red">{{ error }}</p>
@@ -23,6 +21,8 @@
         <button type="submit">Log in</button>
     </form>
 
+    <p>No account yet? <a href="/register">Register here</a></p>
     <p><a href="/">← Back to fruits</a></p>
-</body>
-</html>
+{% endblock %}
+
+{# this is a Jinja comment that would never sent to the browser #}

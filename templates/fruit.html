@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ fruit["name"] }} — Fruit Loop Rater</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}{{ fruit["name"] }}: Fruit Loops{% endblock %}
+
+{% block content %}
     <h1>{{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
 
     <p>
@@ -83,5 +82,4 @@
     {% endif %}
 
     <p><a href="/">← Back to all fruits</a></p>
-</body>
-</html>
+{% endblock %}

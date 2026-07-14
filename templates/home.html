@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Fruit Loop Rater</title>
-</head>
-<body>
-    <h1>welcome to fruit loops :)</h1>
+{% extends "base.html" %}
+
+{% block title %}Fruit Loops{% endblock %}
+
+{% block content %}
+    <h1>Welcome to Fruit Loops!</h1>
     {% if username %}
         <p>Hello, {{ username }} {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small> — <a href="/profile">My profile</a> · <a href="/logout">Log out</a></p>
     {% else %}
@@ -33,5 +32,4 @@
     </li>
         {% endfor %}
     </ul>
-</body>
-</html>
+{% endblock %}

@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Profile — Fruit Loop Rater</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}My Profile: Fruit Loops{% endblock %}
+
+{% block content %}
     <h1>My Profile</h1>
 
     <p>
@@ -39,5 +38,4 @@
     {% endif %}
 
     <p><a href="/">← Back to all fruits</a></p>
-</body>
-</html>
+{% endblock %}
