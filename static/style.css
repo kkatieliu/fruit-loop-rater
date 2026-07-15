@@ -9,3 +9,110 @@ body {
     background: #fffdf9;
     line-height: 1.55;
 }
+
+.fruit-card {
+    background: #ffffff;
+    border: 1px solid #eee5d8;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.fruit-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.fruit-name a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.rate-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 14px;
+    background: #e85d4a;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.headline-stat { font-size: 1.1rem; }
+.alltime-stat  { color: #8a8378; }
+
+a {
+    color: #e85d4a;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.field {
+    margin: 20px 0;
+}
+
+.field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: #e85d4a;
+}
+
+select, input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ddd3c4;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.legend {
+    color: #8a8378;
+    font-size: 0.85rem;
+}
+
+.scale { display: flex; gap: 6px; }
+.scale-option input { display: none; }
+.scale-option span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #ddd3c4;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.scale-option input:checked + span {
+    background: #e85d4a;
+    color: white;
+    border-color: #e85d4a;
+}
+
+.date-row {
+    display: flex;
+    gap: 16px;
+}
+
+.date-row label {
+    flex: 1;
+}
+
+
+.notice {
+    background: #fff4e5;
+    border: 1px solid #f0d9b5;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+}

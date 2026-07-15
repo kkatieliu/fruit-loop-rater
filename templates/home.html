@@ -5,31 +5,32 @@
 {% block content %}
     <h1>Welcome to Fruit Loops!</h1>
     {% if username %}
-        <p>Hello, {{ username }} {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small> — <a href="/profile">My profile</a> · <a href="/logout">Log out</a></p>
+        <p>Hi {{ username }}! {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small> | <a href="/profile">My profile</a> · <a href="/logout">Log out</a></p>
     {% else %}
         <p><a href="/login">Log in</a> or <a href="/register">create an account</a></p>
     {% endif %}
 
 
-    <h2>Today's fruits</h2>
-    <ul>
+    <h2>This week's fruits 🗓️</h2>
+    <p class="legend">🍬 sour → sweet · 💧 dry → juicy · ✊ soft → firm <small>(all 1–10)</small></p>
+    <div class="fruit-list">
         {% for fruit in fruits %}
-                <li>
-        <a href="/fruit/{{ fruit['id'] }}">{{ fruit["emoji"] }} {{ fruit["name"] }}</a>
-        {% if fruit["avg_overall"] %}
-            — {{ fruit["avg_overall"] }}/10 overall satisfaction
-            | 🍬 {{ fruit["avg_sweetness"] }}/10
-            | 💧 {{ fruit["avg_juiciness"] }}/10
-            <small>({{ fruit["num_ratings"] }} ratings)</small>
-        {% else %}
-            — no ratings yet
-        {% endif %}
-
-        {% if username %}
-            <a href="/rate/{{ fruit['id'] }}">Rate this</a>
-        {% endif %}
-
-    </li>
+        <div class="fruit-card">
+            <div class="fruit-name">
+                <a href="/fruit/{{ fruit['id'] }}">{{ fruit["emoji"] }} {{ fruit["name"] }}</a>
+            </div>
+            <div class="fruit-stats">
+                {% if fruit["avg_firmness"] %}
+                    🍬 {{ fruit["avg_sweetness"] }} · 💧 {{ fruit["avg_juiciness"] }} · ✊ {{ fruit["avg_firmness"] }}
+                    <small>({{ fruit["num_ratings"] }})</small>
+                {% else %}
+                    <em>no ratings yet</em>
+                {% endif %}
+            </div>
+            {% if username %}
+                <a class="rate-button" href="/rate/{{ fruit['id'] }}">Rate this</a>
+            {% endif %}
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock %}

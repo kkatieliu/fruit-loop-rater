@@ -7,7 +7,7 @@
 
     <p>
         {{ my_tier["emoji"] }} <strong>{{ my_tier["name"] }}</strong>
-        — {{ count }} rating{{ "s" if count != 1 }}
+        : {{ count }} rating{{ "s" if count != 1 }}
         {% if next_tier_at %}
             <small>({{ next_tier_at - count }} more to reach the next tier!)</small>
         {% else %}
@@ -25,7 +25,7 @@
                 {% for r in week_ratings %}
                     <li>
                         <a href="/fruit/{{ r['fruit_id'] }}">{{ r["fruit_emoji"] }} {{ r["fruit_name"] }}</a>:
-                        {{ r["overall"] }}/10 overall satisfaction | 🍬 {{ r["sweetness"] }} | 💧 {{ r["juiciness"] }}
+                            🍬 {{ r["sweetness"] }} | 💧 {{ r["juiciness"] }} | ✊ {{ r["firmness"] }}
                         <small>(bought {{ r["purchase_date"] | prettydate }},
                                eaten {{ r["consumed_date"] | prettydate }})</small>
                     </li>

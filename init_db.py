@@ -43,7 +43,7 @@ connection.executescript("""
         location_id INTEGER NOT NULL REFERENCES locations(id),
         sweetness INTEGER NOT NULL CHECK (sweetness BETWEEN 1 AND 10),
         juiciness INTEGER NOT NULL CHECK (juiciness BETWEEN 1 AND 10),
-        overall INTEGER NOT NULL CHECK (overall BETWEEN 1 AND 10),
+        firmness INTEGER NOT NULL CHECK (firmness BETWEEN 1 AND 10),
         purchase_date DATE NOT NULL,
         consumed_date DATE NOT NULL CHECK (consumed_date >= purchase_date),
         week_start DATE NOT NULL,

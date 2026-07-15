@@ -42,17 +42,19 @@ def get_db():
 def home():
     db = get_db()
     
+    this_week = week_start_of(date.today())
+
     fruits = db.execute("""
         SELECT f.id, f.name, f.emoji,
-               CAST(ROUND(AVG(r.overall), 0) AS INTEGER)  AS avg_overall,
+               CAST(ROUND(AVG(r.firmness), 0) AS INTEGER)   AS avg_firmness,
                CAST(ROUND(AVG(r.sweetness), 0) AS INTEGER) AS avg_sweetness,
                CAST(ROUND(AVG(r.juiciness), 0) AS INTEGER) AS avg_juiciness,
                COUNT(r.id) AS num_ratings
         FROM fruits f
-        LEFT JOIN ratings r ON r.fruit_id = f.id
+        LEFT JOIN ratings r ON r.fruit_id = f.id AND r.week_start = ?
         GROUP BY f.id
-        ORDER BY avg_overall DESC
-    """).fetchall()
+        ORDER BY num_ratings DESC, f.name
+    """, (this_week,)).fetchall()
     
     
     
@@ -83,7 +85,7 @@ def rate(fruit_id):
         location_id = request.form["location_id"]
         sweetness = int(request.form["sweetness"])
         juiciness = int(request.form["juiciness"])
-        overall = int(request.form["overall"])
+        firmness = int(request.form["firmness"])
         purchase_date = request.form["purchase_date"]
         consumed_date = request.form["consumed_date"]
 
@@ -105,33 +107,43 @@ def rate(fruit_id):
 
         db.execute(
             """INSERT INTO ratings
-               (user_id, fruit_id, location_id, sweetness, juiciness, overall,
+               (user_id, fruit_id, location_id, sweetness, juiciness, firmness,
                 purchase_date, consumed_date, week_start)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT (user_id, fruit_id, location_id, week_start)
                DO UPDATE SET sweetness = excluded.sweetness,
                              juiciness = excluded.juiciness,
-                             overall = excluded.overall,
+                             firmness = excluded.firmness,
                              purchase_date = excluded.purchase_date,
                              consumed_date = excluded.consumed_date,
                              created_at = CURRENT_TIMESTAMP""",
             (session["user_id"], fruit_id, location_id,
-             sweetness, juiciness, overall,
+             sweetness, juiciness, firmness,
              purchase_date, consumed_date, week_start),
         )
         db.commit()
         db.close()
         session["last_location_id"] = int(location_id)
         return redirect(f"/fruit/{fruit_id}")
+    
+    already = db.execute(
+        """SELECT l.nickname FROM ratings r
+           JOIN locations l ON l.id = r.location_id
+           WHERE r.user_id = ? AND r.fruit_id = ? AND r.week_start = ?""",
+        (session["user_id"], fruit_id, week_start_of(date.today())),
+    ).fetchall()
+    already_at = [row["nickname"] for row in already]
 
     db.close()
     today = date.today().isoformat()
+    
     return render_template(
         "rate.html",
         fruit=fruit,
         locations=locations,
         today=today,
         last_location_id=session.get("last_location_id"),
+        already_at=already_at,
     )
 
 
@@ -207,9 +219,21 @@ def fruit_detail(fruit_id):
 
     loc_filter = "AND location_id = ?" if location_id else ""    
     loc_params = (location_id,) if location_id else ()           
+    
+    this_week = week_start_of(date.today())
+
+    this_week_avg = db.execute(
+        f"""SELECT CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
+                   CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
+                   CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
+                   COUNT(id) AS num_ratings
+            FROM ratings
+            WHERE fruit_id = ? AND week_start = ? {loc_filter}""",
+        (fruit_id, this_week, *loc_params),
+    ).fetchone()
 
     averages = db.execute(
-        f"""SELECT CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS avg_overall,
+        f"""SELECT CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
                    CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
                    CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
                    COUNT(id) AS num_ratings
@@ -218,7 +242,7 @@ def fruit_detail(fruit_id):
     ).fetchone()
 
     ratings = db.execute(
-        f"""SELECT r.sweetness, r.juiciness, r.overall,
+        f"""SELECT r.sweetness, r.juiciness, r.firmness,
                    r.purchase_date, r.consumed_date,
                    l.nickname AS location,
                    (SELECT COUNT(*) FROM ratings r2
@@ -232,7 +256,7 @@ def fruit_detail(fruit_id):
 
     weekly = db.execute(
         f"""SELECT week_start,
-                   CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS avg_overall,
+                   CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
                    CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
                    CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
                    COUNT(id) AS num_ratings
@@ -246,7 +270,7 @@ def fruit_detail(fruit_id):
     my_weekly = {}
     if "user_id" in session:
         rows = db.execute(
-            f"""SELECT week_start, sweetness, juiciness, overall
+            f"""SELECT week_start, sweetness, juiciness, firmness
                 FROM ratings
                 WHERE fruit_id = ? AND user_id = ? {loc_filter}""",
             (fruit_id, session["user_id"], *loc_params),
@@ -255,7 +279,7 @@ def fruit_detail(fruit_id):
 
     db.close()
     return render_template("fruit.html", fruit=fruit, averages=averages,
-                           ratings=ratings, weekly=weekly, my_weekly=my_weekly,
+                           ratings=ratings, weekly=weekly, my_weekly=my_weekly, this_week_avg=this_week_avg,
                            locations=locations, selected_location=location_id,
                            tier_for=tier_for)
     
@@ -267,7 +291,7 @@ def profile():
     db = get_db()
 
     my_ratings = db.execute(
-        """SELECT r.sweetness, r.juiciness, r.overall,
+        """SELECT r.sweetness, r.juiciness, r.firmness,
                 r.purchase_date, r.consumed_date, r.week_start,
                 f.name AS fruit_name, f.emoji AS fruit_emoji, f.id AS fruit_id,
                 l.nickname AS location
