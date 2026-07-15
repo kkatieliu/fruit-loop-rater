@@ -6,9 +6,14 @@
     <h1>Welcome to Fruit Loops!</h1>
     {% if username %}
         <p>Hi {{ username }}! {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small> | <a href="/profile">My profile</a> · <a href="/logout">Log out</a></p>
+        <p class="blurb">Real-time fruit scores for actual Costcos in Burnaby and Vancouver! </p>
+        <p class="blurb">Check the batch before you buy. </p>
     {% else %}
         <p><a href="/login">Log in</a> or <a href="/register">create an account</a></p>
+        <p class="blurb">Rate Costco fruit each week! Check the batch before you buy.</p>
+        <p class="blurb">No judging, some people like their kiwis firm! 🥝</p>
     {% endif %}
+
 
 
     <h2>This week's fruits 🗓️</h2>
@@ -30,7 +35,10 @@
             {% if username %}
                 <a class="rate-button" href="/rate/{{ fruit['id'] }}">Rate this</a>
             {% endif %}
+
         </div>
-        {% endfor %}
+         {% endfor %}
+         <p class="feedback"><a href="https://docs.google.com/forms/d/e/1FAIpQLSezVfzeH6Iuj4zHCthRQ-sh6c85TV3kWvAy0750_xcMW0q_Ww/viewform" target="_blank"> 💬 Feedback during early development? We'd love to hear!</a></p>
+       
     </div>
 {% endblock %}

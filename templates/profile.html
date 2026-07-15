@@ -25,7 +25,7 @@
                 {% for r in week_ratings %}
                     <li>
                         <a href="/fruit/{{ r['fruit_id'] }}">{{ r["fruit_emoji"] }} {{ r["fruit_name"] }}</a>:
-                            🍬 {{ r["sweetness"] }} | 💧 {{ r["juiciness"] }} | ✊ {{ r["firmness"] }}
+                            🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }} · ✊ {{ r["firmness"] }}
                         <small>(bought {{ r["purchase_date"] | prettydate }},
                                eaten {{ r["consumed_date"] | prettydate }})</small>
                     </li>

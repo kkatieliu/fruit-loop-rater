@@ -116,3 +116,34 @@ select, input[type="date"] {
     padding: 10px 14px;
     font-size: 0.9rem;
 }
+
+.weekly-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.weekly-table th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e85d4a;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8a8378;
+}
+
+.weekly-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee5d8;
+}
+
+.weekly-table tr:last-child td {
+    border-bottom: none;
+}
+
+.blurb {
+    color: #6b6459;
+    font-size: 0.95rem;
+    margin: 4px 0;
+}

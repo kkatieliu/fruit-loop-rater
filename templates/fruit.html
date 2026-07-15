@@ -25,8 +25,8 @@
         <p class="headline-stat">
             This week: 
             🍬 Sweetness {{ this_week_avg["avg_sweetness"] }}/10
-            | 💧 Juiciness {{ this_week_avg["avg_juiciness"] }}/10
-            | ✊ Firmness {{ this_week_avg["avg_firmness"] }}/10
+            · 💧 Juiciness {{ this_week_avg["avg_juiciness"] }}/10
+            · ✊ Firmness {{ this_week_avg["avg_firmness"] }}/10
 
             <small>({{ this_week_avg["num_ratings"] }} rating{{ "s" if this_week_avg["num_ratings"] != 1 }})</small>
         </p>
@@ -37,7 +37,7 @@
 
     <h2>Week by week</h2>
     {% if weekly %}
-        <table border="1" cellpadding="6">
+        <table class="weekly-table">
             <tr>
                 <th>Week of</th>
                 <th>Everyone</th>
@@ -49,11 +49,11 @@
             <tr>
                 <td>{{ w["week_start"] | prettydate }}</td>
                 <td>
-                     🍬 {{ w["avg_sweetness"] }} | 💧 {{ w["avg_juiciness"] }} | ✊ {{ w["avg_firmness"] }}
+                     🍬 {{ w["avg_sweetness"] }} · 💧 {{ w["avg_juiciness"] }} · ✊ {{ w["avg_firmness"] }}
                 </td>
                 <td>
                     {% if mine %}
-                        🍬 {{ mine["sweetness"] }} | 💧 {{ mine["juiciness"] }} | ✊ {{ mine["firmness"] }}
+                        🍬 {{ mine["sweetness"] }} · 💧 {{ mine["juiciness"] }} · ✊ {{ mine["firmness"] }}
                     {% else %}
                         —
                     {% endif %}
@@ -70,8 +70,8 @@
         <p class="alltime-stat"><small>
             All-time: 
             🍬 {{ averages["avg_sweetness"] }}
-            | 💧 {{ averages["avg_juiciness"] }}
-            | ✊ {{ averages["avg_firmness"] }}
+            · 💧 {{ averages["avg_juiciness"] }}
+            · ✊ {{ averages["avg_firmness"] }}
             ({{ averages["num_ratings"] }} ratings)
         </small></p>
 
@@ -81,8 +81,8 @@
             {% for r in ratings %}
                 <li>
                     {% set tier = tier_for(r["rater_count"]) %}
-                    🍬 {{ r["sweetness"] }} | 💧 {{ r["juiciness"] }} | ✊ {{ r["firmness"] }}
-                    — {{ r["location"] }}
+                    🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }} · ✊ {{ r["firmness"] }}
+                    at {{ r["location"] }}
                     <small>(bought {{ r["purchase_date"] | prettydate }},
                            eaten {{ r["consumed_date"] | prettydate }}),
                            {{ tier["emoji"] }} {{ tier["name"] }}</small>
