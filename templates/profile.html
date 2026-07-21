@@ -28,6 +28,11 @@
                             🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }} · ✊ {{ r["firmness"] }}
                         <small>(bought {{ r["purchase_date"] | prettydate }},
                                eaten {{ r["consumed_date"] | prettydate }})</small>
+                        <form method="POST" action="/delete-rating/{{ r['rating_id'] }}"
+                              style="display:inline"
+                              onsubmit="return confirm('Delete this rating? This can\'t be undone.');">
+                            <button type="submit" class="delete-button">Delete rating</button>
+                        </form>
                     </li>
                 {% endfor %}
                 </ul>

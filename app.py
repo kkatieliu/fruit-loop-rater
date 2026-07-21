@@ -297,15 +297,15 @@ def profile():
     db = get_db()
 
     my_ratings = db.execute(
-        """SELECT r.sweetness, r.juiciness, r.firmness,
-                r.purchase_date, r.consumed_date, r.week_start,
-                f.name AS fruit_name, f.emoji AS fruit_emoji, f.id AS fruit_id,
-                l.nickname AS location
-        FROM ratings r
-        JOIN fruits f ON f.id = r.fruit_id
-        JOIN locations l ON l.id = r.location_id
-        WHERE r.user_id = ?
-        ORDER BY r.consumed_date DESC""",
+        """SELECT r.id AS rating_id, r.sweetness, r.juiciness, r.firmness,
+                  r.purchase_date, r.consumed_date, r.week_start,
+                  f.name AS fruit_name, f.emoji AS fruit_emoji, f.id AS fruit_id,
+                  l.nickname AS location
+           FROM ratings r
+           JOIN fruits f ON f.id = r.fruit_id
+           JOIN locations l ON l.id = r.location_id
+           WHERE r.user_id = ?
+           ORDER BY r.consumed_date DESC""",
         (session["user_id"],),
     ).fetchall()
     
@@ -327,3 +327,17 @@ def profile():
     return render_template("profile.html", ratings=my_ratings,
                         count=count, my_tier=my_tier,
                         next_tier_at=next_tier_at, by_location=by_location)
+    
+@app.route("/delete-rating/<int:rating_id>", methods=["POST"])
+def delete_rating(rating_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    db = get_db()
+    db.execute(
+        "DELETE FROM ratings WHERE id = ? AND user_id = ?",
+        (rating_id, session["user_id"]),
+    )
+    db.commit()
+    db.close()
+    return redirect("/profile")

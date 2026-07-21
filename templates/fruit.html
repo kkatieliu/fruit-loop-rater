@@ -23,9 +23,9 @@
 
     {% if this_week_avg["num_ratings"] > 0 %}
         <p class="headline-stat">
-            🍬 Sweetness {{ this_week_avg["avg_sweetness"] }}/10
-            · 💧 Juiciness {{ this_week_avg["avg_juiciness"] }}/10
-            · ✊ Firmness {{ this_week_avg["avg_firmness"] }}/10
+            <span class="stat-line">🍬 Sweetness {{ this_week_avg["avg_sweetness"] }}/10</span>
+            <span class="stat-line">💧 Juiciness {{ this_week_avg["avg_juiciness"] }}/10</span>
+            <span class="stat-line">✊ Firmness {{ this_week_avg["avg_firmness"] }}/10</span>
             <small>({{ this_week_avg["num_ratings"] }} rating{{ "s" if this_week_avg["num_ratings"] != 1 }})</small>
         </p>
     {% else %}

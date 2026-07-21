@@ -190,3 +190,34 @@ select, input[type="date"] {
     text-align: center;
     margin-bottom: 24px;
 }
+
+
+.stat-line::after {
+    content: " · ";
+    color: #8a8378;
+}
+
+.stat-line:last-of-type::after {
+    content: "";
+}
+
+@media (max-width: 480px) {
+    .stat-line {
+        display: block;
+        margin-bottom: 2px;
+    }
+    .stat-line::after {
+        content: "";
+    }
+}
+
+.delete-button {
+    margin-top: 4px;
+    padding: 3px 10px;
+    background: none;
+    border: 1px solid #cc4444;
+    color: #cc4444;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
