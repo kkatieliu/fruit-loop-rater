@@ -2,6 +2,11 @@ import sqlite3
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date, timedelta
+import os   # add to the imports at the top
+from dotenv import load_dotenv
+load_dotenv()   # reads .env into os.environ, if the file exists
+
+
 
 # since we need a unique week we will use the trick of storing the monday 
 def week_start_of(d: date) -> date:
@@ -22,7 +27,7 @@ def tier_for(count):
 
 app = Flask(__name__)
 # dont allow anyone to change the cookie in production and pretend they are another user
-app.secret_key = "dev-only-change-me" 
+app.secret_key = os.environ["SECRET_KEY"]   # square brackets: no key, no app — KeyError at startup
 
 @app.template_filter("prettydate")
 def prettydate(value):
