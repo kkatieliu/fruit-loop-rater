@@ -3,23 +3,23 @@
 {% block title %}Fruit Loops{% endblock %}
 
 {% block content %}
-    <header class="hero">
+   <header class="hero">
         <h1>Welcome to Fruit Loops!</h1>
         <p class="tagline">Keeping fruit lovers in the loop 🍓</p>
         <p>Real-time fruit scores for actual Costcos in Burnaby and Vancouver!</p>
-   
-    </header>    
-    
-    {% if username %}
-        <p>Hi {{ username }}! {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small> | <a href="/profile">My profile</a> · <a href="/logout">Log out</a></p>
-    {% else %}
-        <p><a href="/login">Log in</a> or <a href="/register">create an account</a></p>
-  {% endif %}
+    </header>
 
+    <div class="page-intro">
+        {% if username %}
+            <p>Hi {{ username }}! {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small> | <a href="/profile">My profile</a> · <a href="/logout">Log out</a></p>
+        {% else %}
+            <p><a href="/login">Log in</a> or <a href="/register">create an account</a></p>
+        {% endif %}
 
+        <h2>This week's fruits 🗓️</h2>
+        <p class="legend">🍬 sour → sweet · 💧 dry → juicy · ✊ soft → firm <small>(1–10)</small></p>
+    </div>
 
-    <h2>This week's fruits 🗓️</h2>
-    <p class="legend">🍬 sour → sweet · 💧 dry → juicy · ✊ soft → firm <small>(all 1–10)</small></p>
     <div class="fruit-list">
         {% for fruit in fruits %}
         <div class="fruit-card">
@@ -37,10 +37,9 @@
             {% if username %}
                 <a class="rate-button" href="/rate/{{ fruit['id'] }}">Rate this</a>
             {% endif %}
-
         </div>
-         {% endfor %}
-         <p class="feedback"><a href="https://docs.google.com/forms/d/e/1FAIpQLSezVfzeH6Iuj4zHCthRQ-sh6c85TV3kWvAy0750_xcMW0q_Ww/viewform" target="_blank"> 💬 Feedback during early development? We'd love to hear!</a></p>
-       
+        {% endfor %}
     </div>
+
+    <p class="feedback"><a href="https://docs.google.com/forms/d/e/1FAIpQLSezVfzeH6Iuj4zHCthRQ-sh6c85TV3kWvAy0750_xcMW0q_Ww/viewform" target="_blank"> 💬 Feedback during early development? We'd love to hear!</a></p>
 {% endblock %}
