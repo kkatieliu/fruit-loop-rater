@@ -6,6 +6,7 @@ import os   # add to the imports at the top
 from dotenv import load_dotenv
 load_dotenv()   # reads .env into os.environ, if the file exists
 
+DB_PATH = os.environ.get("DATABASE_PATH", "fruitloop.db")
 
 
 # since we need a unique week we will use the trick of storing the monday 
@@ -39,7 +40,7 @@ def prettydate(value):
     return value
 
 def get_db():
-    db = sqlite3.connect("fruitloop.db")
+    db = sqlite3.connect(DB_PATH)
     db.row_factory = sqlite3.Row
     return db
 
