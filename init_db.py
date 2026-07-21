@@ -1,7 +1,9 @@
+import os
 import sqlite3
 
-connection = sqlite3.connect("fruitloop.db")   # creates the file if it doesn't exist
+DB_PATH = os.environ.get("DATABASE_PATH", "fruitloop.db")
 
+connection = sqlite3.connect(DB_PATH)
 ## the unique in the ratings table ensures that a user can only rate a fruit once
 connection.executescript("""
     CREATE TABLE IF NOT EXISTS fruits (
