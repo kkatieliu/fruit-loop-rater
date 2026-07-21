@@ -147,3 +147,31 @@ select, input[type="date"] {
     font-size: 0.95rem;
     margin: 4px 0;
 }
+
+@media (max-width: 480px) {
+    .weekly-table thead, .weekly-table tr:first-child {
+        display: none;
+    }
+    .weekly-table, .weekly-table tbody, .weekly-table tr, .weekly-table td {
+        display: block;
+        width: 100%;
+    }
+    .weekly-table tr {
+        margin-bottom: 16px;
+        border: 1px solid #eee5d8;
+        border-radius: 10px;
+        padding: 10px 12px;
+    }
+    .weekly-table td {
+        border-bottom: none;
+        padding: 4px 0;
+    }
+    .weekly-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        display: block;
+        font-size: 0.75rem;
+        color: #8a8378;
+        text-transform: uppercase;
+    }
+}

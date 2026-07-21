@@ -23,7 +23,6 @@
 
     {% if this_week_avg["num_ratings"] > 0 %}
         <p class="headline-stat">
-            This week: 
             🍬 Sweetness {{ this_week_avg["avg_sweetness"] }}/10
             · 💧 Juiciness {{ this_week_avg["avg_juiciness"] }}/10
             · ✊ Firmness {{ this_week_avg["avg_firmness"] }}/10
@@ -31,8 +30,8 @@
             <small>({{ this_week_avg["num_ratings"] }} rating{{ "s" if this_week_avg["num_ratings"] != 1 }})</small>
         </p>
     {% else %}
-        <p class="headline-stat"><em>No ratings yet this week</em>
-           — <a href="/rate/{{ fruit['id'] }}">be the first</a>!</p>
+        <p class="headline-stat"><em>No ratings yet this week: </em>
+            <a href="/rate/{{ fruit['id'] }}">be the first</a>!</p>
     {% endif %}
 
     <h2>Week by week</h2>
@@ -47,23 +46,23 @@
             {% for w in weekly %}
             {% set mine = my_weekly.get(w["week_start"]) %}
             <tr>
-                <td>{{ w["week_start"] | prettydate }}</td>
-                <td>
+                <td data-label="Week of">{{ w["week_start"] | prettydate }}</td>
+                <td data-label="Everyone">
                      🍬 {{ w["avg_sweetness"] }} · 💧 {{ w["avg_juiciness"] }} · ✊ {{ w["avg_firmness"] }}
                 </td>
-                <td>
+                <td data-label="You">
                     {% if mine %}
                         🍬 {{ mine["sweetness"] }} · 💧 {{ mine["juiciness"] }} · ✊ {{ mine["firmness"] }}
                     {% else %}
                         —
                     {% endif %}
                 </td>
-                <td>{{ w["num_ratings"] }}</td>
+                <td data-label="Ratings">{{ w["num_ratings"] }}</td>
             </tr>
             {% endfor %}
         </table>
     {% else %}
-        <p>No ratings here yet{% if selected_location %} for this Costco{% endif %} — <a href="/rate/{{ fruit['id'] }}">be the first to rate</a>!</p>
+        <p>No ratings here yet{% if selected_location %} for this Costco: {% endif %}  <a href="/rate/{{ fruit['id'] }}">be the first to rate</a>!</p>
     {% endif %}
 
     {% if averages["num_ratings"] > 0 %}
