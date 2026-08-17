@@ -492,6 +492,22 @@ select:focus, input:focus {
 .scale-option span:hover {
     border-color: var(--color-accent);
 }
+
+@media (max-width: 420px) {
+    /* 10 fixed-size circles either overflow or wrap unevenly (6+4) on a
+       narrow phone - a deliberate 5-per-row grid keeps it even and lets
+       each circle size itself to the available width instead. */
+    .scale {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+    }
+    .scale-option span {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+    }
+}
 .scale-option input:checked + span {
     background: var(--color-accent);
     color: white;
