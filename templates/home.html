@@ -16,8 +16,8 @@
             <p><a href="/login">Log in</a> or <a href="/register">create an account</a></p>
         {% endif %}
 
-        <h2>This week's fruits 🗓️</h2>
-        <p class="legend">🍬 sour → sweet · 💧 dry → juicy · ✊ soft → firm </p>
+        <h2>Fruits from the last 7 days 🗓️</h2>
+        <p class="legend">⭐ overall rating · click a fruit for the sweet, juicy and firm breakdown!</p>
     </div>
 
     <div class="fruit-list">
@@ -27,8 +27,8 @@
                 <a href="/fruit/{{ fruit['id'] }}">{{ fruit["emoji"] }} {{ fruit["name"] }}</a>
             </div>
             <div class="fruit-stats">
-                {% if fruit["avg_firmness"] %}
-                    🍬 {{ fruit["avg_sweetness"] }} · 💧 {{ fruit["avg_juiciness"] }} · ✊ {{ fruit["avg_firmness"] }}
+                {% if fruit["num_ratings"] > 0 %}
+                    ⭐ {{ fruit["avg_overall"] if fruit["avg_overall"] is not none else "—" }}
                     <small>({{ fruit["num_ratings"] }})</small>
                 {% else %}
                     <em>no ratings yet</em>

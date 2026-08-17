@@ -6,8 +6,10 @@
     <h1>Rate {{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
 
     {% if already_at %}
-        <p class="notice"> Ratings are once per fruit, per Costco,
-           per week - submitting again for the same Costco will replace your pervious rating.</p>
+        <p class="notice">You've already rated this fruit at a Costco below this week —
+           that's fine, rate away! Your score for that fruit and Costco this week will
+           be the average of all your ratings, and each one still shows up under
+           "See individual ratings."</p>
     {% endif %}
 
     {% if error %}
@@ -25,6 +27,20 @@
                 {% endfor %}
             </select>
         </label>
+
+        <div class="field">
+            <label>⭐ Overall</label>
+            <div class="slider-row">
+                <div class="scale" role="radiogroup">
+                    {% for n in range(1, 11) %}
+                        <label class="scale-option">
+                            <input type="radio" name="overall" value="{{ n }}" {% if n == 5 %}checked{% endif %}>
+                            <span>{{ n }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
 
         <div class="field">
             <label>Sour ↔ Sweet</label>

@@ -48,26 +48,35 @@ def get_db():
 def home():
     db = get_db()
     
-    this_week = week_start_of(date.today())
+    window_start = date.today() - timedelta(days=6)
+    window_end = date.today()
 
     fruits = db.execute("""
+        WITH slot_avgs AS (
+            SELECT fruit_id, user_id, location_id,
+                   AVG(overall) AS overall
+            FROM ratings
+            WHERE consumed_date BETWEEN ? AND ?
+            GROUP BY fruit_id, user_id, location_id
+        )
         SELECT f.id, f.name, f.emoji,
-               CAST(ROUND(AVG(r.firmness), 0) AS INTEGER)   AS avg_firmness,
-               CAST(ROUND(AVG(r.sweetness), 0) AS INTEGER) AS avg_sweetness,
-               CAST(ROUND(AVG(r.juiciness), 0) AS INTEGER) AS avg_juiciness,
-               COUNT(r.id) AS num_ratings
+               CAST(ROUND(AVG(s.overall), 0) AS INTEGER) AS avg_overall,
+               COUNT(s.user_id) AS num_ratings
         FROM fruits f
-        LEFT JOIN ratings r ON r.fruit_id = f.id AND r.week_start = ?
+        LEFT JOIN slot_avgs s ON s.fruit_id = f.id
         GROUP BY f.id
-        ORDER BY num_ratings DESC, f.name
-    """, (this_week,)).fetchall()
-    
-    
-    
+        ORDER BY avg_overall DESC, num_ratings DESC, f.name
+    """, (window_start, window_end)).fetchall()
+
+
+
     my_tier = None
     if "user_id" in session:
         count = db.execute(
-            "SELECT COUNT(*) AS c FROM ratings WHERE user_id = ?",
+            """SELECT COUNT(*) AS c FROM (
+                   SELECT DISTINCT fruit_id, location_id, week_start
+                   FROM ratings WHERE user_id = ?
+               )""",
             (session["user_id"],),
         ).fetchone()["c"]
         my_tier = tier_for(count)
@@ -89,6 +98,7 @@ def rate(fruit_id):
 
     if request.method == "POST":
         location_id = request.form["location_id"]
+        overall = int(request.form["overall"])
         sweetness = int(request.form["sweetness"])
         juiciness = int(request.form["juiciness"])
         firmness = int(request.form["firmness"])
@@ -113,18 +123,11 @@ def rate(fruit_id):
 
         db.execute(
             """INSERT INTO ratings
-               (user_id, fruit_id, location_id, sweetness, juiciness, firmness,
+               (user_id, fruit_id, location_id, sweetness, juiciness, firmness, overall,
                 purchase_date, consumed_date, week_start)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-               ON CONFLICT (user_id, fruit_id, location_id, week_start)
-               DO UPDATE SET sweetness = excluded.sweetness,
-                             juiciness = excluded.juiciness,
-                             firmness = excluded.firmness,
-                             purchase_date = excluded.purchase_date,
-                             consumed_date = excluded.consumed_date,
-                             created_at = CURRENT_TIMESTAMP""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (session["user_id"], fruit_id, location_id,
-             sweetness, juiciness, firmness,
+             sweetness, juiciness, firmness, overall,
              purchase_date, consumed_date, week_start),
         )
         db.commit()
@@ -133,7 +136,7 @@ def rate(fruit_id):
         return redirect(f"/fruit/{fruit_id}")
     
     already = db.execute(
-        """SELECT l.nickname FROM ratings r
+        """SELECT DISTINCT l.nickname FROM ratings r
            JOIN locations l ON l.id = r.location_id
            WHERE r.user_id = ? AND r.fruit_id = ? AND r.week_start = ?""",
         (session["user_id"], fruit_id, week_start_of(date.today())),
@@ -226,33 +229,63 @@ def fruit_detail(fruit_id):
     loc_filter = "AND location_id = ?" if location_id else ""    
     loc_params = (location_id,) if location_id else ()           
     
-    this_week = week_start_of(date.today())
+    window_start = date.today() - timedelta(days=6)
+    window_end = date.today()
 
-    this_week_avg = db.execute(
-        f"""SELECT CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
+    # Each user's own ratings for a given fruit+location within the window
+    # are averaged together first, into one "slot". Every aggregate below is
+    # then an average of slots, not of raw rows — so one person rating 20
+    # times doesn't outweigh someone who rated once.
+    recent_avg = db.execute(
+        f"""WITH slot_avgs AS (
+                SELECT user_id, location_id,
+                       AVG(firmness) AS firmness,
+                       AVG(sweetness) AS sweetness,
+                       AVG(juiciness) AS juiciness,
+                       AVG(overall) AS overall
+                FROM ratings
+                WHERE fruit_id = ? AND consumed_date BETWEEN ? AND ? {loc_filter}
+                GROUP BY user_id, location_id
+            )
+            SELECT CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
                    CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
                    CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
-                   COUNT(id) AS num_ratings
-            FROM ratings
-            WHERE fruit_id = ? AND week_start = ? {loc_filter}""",
-        (fruit_id, this_week, *loc_params),
+                   CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS avg_overall,
+                   COUNT(*) AS num_ratings
+            FROM slot_avgs""",
+        (fruit_id, window_start, window_end, *loc_params),
     ).fetchone()
 
+    # All-time collapses the week dimension (one vote per user per location,
+    # across their whole history) but keeps location separate, same as everywhere else.
     averages = db.execute(
-        f"""SELECT CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
+        f"""WITH slot_avgs AS (
+                SELECT user_id, location_id,
+                       AVG(firmness) AS firmness,
+                       AVG(sweetness) AS sweetness,
+                       AVG(juiciness) AS juiciness,
+                       AVG(overall) AS overall
+                FROM ratings
+                WHERE fruit_id = ? {loc_filter}
+                GROUP BY user_id, location_id
+            )
+            SELECT CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
                    CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
                    CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
-                   COUNT(id) AS num_ratings
-            FROM ratings WHERE fruit_id = ? {loc_filter}""",
+                   CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS avg_overall,
+                   COUNT(*) AS num_ratings
+            FROM slot_avgs""",
         (fruit_id, *loc_params),
     ).fetchone()
 
     ratings = db.execute(
-        f"""SELECT r.sweetness, r.juiciness, r.firmness,
+        f"""SELECT r.sweetness, r.juiciness, r.firmness, r.overall,
                    r.purchase_date, r.consumed_date,
                    l.nickname AS location,
-                   (SELECT COUNT(*) FROM ratings r2
-                    WHERE r2.user_id = r.user_id) AS rater_count
+                   (SELECT COUNT(*) FROM (
+                        SELECT DISTINCT fruit_id, location_id, week_start
+                        FROM ratings r2 WHERE r2.user_id = r.user_id
+                    )) AS rater_count
             FROM ratings r
             JOIN locations l ON l.id = r.location_id
             WHERE r.fruit_id = ? {loc_filter}
@@ -261,13 +294,23 @@ def fruit_detail(fruit_id):
     ).fetchall()
 
     weekly = db.execute(
-        f"""SELECT week_start,
+        f"""WITH slot_avgs AS (
+                SELECT week_start, user_id, location_id,
+                       AVG(firmness) AS firmness,
+                       AVG(sweetness) AS sweetness,
+                       AVG(juiciness) AS juiciness,
+                       AVG(overall) AS overall
+                FROM ratings
+                WHERE fruit_id = ? {loc_filter}
+                GROUP BY week_start, user_id, location_id
+            )
+            SELECT week_start,
                    CAST(ROUND(AVG(firmness), 0) AS INTEGER)   AS avg_firmness,
                    CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS avg_sweetness,
                    CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS avg_juiciness,
-                   COUNT(id) AS num_ratings
-            FROM ratings
-            WHERE fruit_id = ? {loc_filter}
+                   CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS avg_overall,
+                   COUNT(*) AS num_ratings
+            FROM slot_avgs
             GROUP BY week_start
             ORDER BY week_start DESC""",
         (fruit_id, *loc_params),
@@ -276,16 +319,21 @@ def fruit_detail(fruit_id):
     my_weekly = {}
     if "user_id" in session:
         rows = db.execute(
-            f"""SELECT week_start, sweetness, juiciness, firmness
+            f"""SELECT week_start,
+                       CAST(ROUND(AVG(sweetness), 0) AS INTEGER) AS sweetness,
+                       CAST(ROUND(AVG(juiciness), 0) AS INTEGER) AS juiciness,
+                       CAST(ROUND(AVG(firmness), 0) AS INTEGER)  AS firmness,
+                       CAST(ROUND(AVG(overall), 0) AS INTEGER)   AS overall
                 FROM ratings
-                WHERE fruit_id = ? AND user_id = ? {loc_filter}""",
+                WHERE fruit_id = ? AND user_id = ? {loc_filter}
+                GROUP BY week_start""",
             (fruit_id, session["user_id"], *loc_params),
         ).fetchall()
         my_weekly = {r["week_start"]: r for r in rows}
 
     db.close()
     return render_template("fruit.html", fruit=fruit, averages=averages,
-                           ratings=ratings, weekly=weekly, my_weekly=my_weekly, this_week_avg=this_week_avg,
+                           ratings=ratings, weekly=weekly, my_weekly=my_weekly, recent_avg=recent_avg,
                            locations=locations, selected_location=location_id,
                            tier_for=tier_for)
     
@@ -315,7 +363,13 @@ def profile():
         week = r["week_start"]
         by_location.setdefault(loc, {}).setdefault(week, []).append(r)
 
-    count = len(my_ratings)
+    count = db.execute(
+        """SELECT COUNT(*) AS c FROM (
+               SELECT DISTINCT fruit_id, location_id, week_start
+               FROM ratings WHERE user_id = ?
+           )""",
+        (session["user_id"],),
+    ).fetchone()["c"]
     my_tier = tier_for(count)
 
     next_tier_at = None

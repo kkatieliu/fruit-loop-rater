@@ -21,15 +21,16 @@
         {% endfor %}
     </p>
 
-    {% if this_week_avg["num_ratings"] > 0 %}
+    {% if recent_avg["num_ratings"] > 0 %}
         <p class="headline-stat">
-            <span class="stat-line">🍬 Sweetness {{ this_week_avg["avg_sweetness"] }}/10</span>
-            <span class="stat-line">💧 Juiciness {{ this_week_avg["avg_juiciness"] }}/10</span>
-            <span class="stat-line">✊ Firmness {{ this_week_avg["avg_firmness"] }}/10</span>
-            <small>({{ this_week_avg["num_ratings"] }} rating{{ "s" if this_week_avg["num_ratings"] != 1 }})</small>
+            <span class="stat-line">⭐ Overall {{ recent_avg["avg_overall"] if recent_avg["avg_overall"] is not none else "—" }}/10</span>
+            <span class="stat-line">🍬 Sweetness {{ recent_avg["avg_sweetness"] }}/10</span>
+            <span class="stat-line">💧 Juiciness {{ recent_avg["avg_juiciness"] }}/10</span>
+            <span class="stat-line">✊ Firmness {{ recent_avg["avg_firmness"] }}/10</span>
+            <small>({{ recent_avg["num_ratings"] }} rating{{ "s" if recent_avg["num_ratings"] != 1 }} in the last 7 days)</small>
         </p>
     {% else %}
-        <p class="headline-stat"><em>No ratings yet this week: </em>
+        <p class="headline-stat"><em>No ratings in the last 7 days: </em>
             <a href="/rate/{{ fruit['id'] }}">be the first</a>!</p>
     {% endif %}
 
@@ -47,11 +48,11 @@
             <tr>
                 <td data-label="Week of">{{ w["week_start"] | prettydate }}</td>
                 <td data-label="Everyone">
-                     🍬 {{ w["avg_sweetness"] }} · 💧 {{ w["avg_juiciness"] }} · ✊ {{ w["avg_firmness"] }}
+                     ⭐ {{ w["avg_overall"] if w["avg_overall"] is not none else "—" }} · 🍬 {{ w["avg_sweetness"] }} · 💧 {{ w["avg_juiciness"] }} · ✊ {{ w["avg_firmness"] }}
                 </td>
                 <td data-label="You">
                     {% if mine %}
-                        🍬 {{ mine["sweetness"] }} · 💧 {{ mine["juiciness"] }} · ✊ {{ mine["firmness"] }}
+                        ⭐ {{ mine["overall"] if mine["overall"] is not none else "—" }} · 🍬 {{ mine["sweetness"] }} · 💧 {{ mine["juiciness"] }} · ✊ {{ mine["firmness"] }}
                     {% else %}
                         —
                     {% endif %}
@@ -66,8 +67,9 @@
 
     {% if averages["num_ratings"] > 0 %}
         <p class="alltime-stat"><small>
-            All-time: 
-            🍬 {{ averages["avg_sweetness"] }}
+            All-time:
+            ⭐ {{ averages["avg_overall"] if averages["avg_overall"] is not none else "—" }}
+            · 🍬 {{ averages["avg_sweetness"] }}
             · 💧 {{ averages["avg_juiciness"] }}
             · ✊ {{ averages["avg_firmness"] }}
             ({{ averages["num_ratings"] }} ratings)
@@ -79,7 +81,7 @@
             {% for r in ratings %}
                 <li>
                     {% set tier = tier_for(r["rater_count"]) %}
-                    🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }} · ✊ {{ r["firmness"] }}
+                    ⭐ {{ r["overall"] if r["overall"] is not none else "—" }} · 🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }} · ✊ {{ r["firmness"] }}
                     at {{ r["location"] }}
                     <small>(bought {{ r["purchase_date"] | prettydate }},
                            eaten {{ r["consumed_date"] | prettydate }}),
