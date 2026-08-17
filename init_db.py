@@ -13,13 +13,21 @@ connection.executescript("""
         emoji TEXT
     );
 
+    -- Runs before the seed INSERT below: renames an already-seeded
+    -- 'Strawberries' row to 'Strawberry' first, so the INSERT OR IGNORE's
+    -- 'Strawberry' row correctly gets skipped as a duplicate instead of
+    -- being created alongside the old row under its old name.
+    UPDATE fruits SET name = 'Strawberry' WHERE name = 'Strawberries';
+
     INSERT OR IGNORE INTO fruits (name, emoji) VALUES
         ('Watermelon', '🍉'),
-        ('Strawberries', '🍓'),
+        ('Strawberry', '🍓'),
         ('Banana', '🍌'),
         ('Tomato', '🍅'),
         ('Ogrange', '🍊'),
-        ('Kiwi', '🥝');
+        ('Kiwi', '🥝'),
+        ('Pear', '🍐'),
+        ('Pineapple', '🍍');
 
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

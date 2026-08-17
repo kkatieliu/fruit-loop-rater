@@ -234,7 +234,7 @@ def fruit_detail(fruit_id):
 
     # Each user's own ratings for a given fruit+location within the window
     # are averaged together first, into one "slot". Every aggregate below is
-    # then an average of slots, not of raw rows — so one person rating 20
+    # then an average of slots, not of raw rows - so one person rating 20
     # times doesn't outweigh someone who rated once.
     recent_avg = db.execute(
         f"""WITH slot_avgs AS (
