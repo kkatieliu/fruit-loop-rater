@@ -5,92 +5,141 @@
 {% block content %}
     <h1>{{ fruit["emoji"] }} {{ fruit["name"] }}</h1>
 
-    <p>
-        {% if selected_location %}
-            <a href="/fruit/{{ fruit['id'] }}">All Costcos</a>
+    <div id="fruit-content" data-fruit-id="{{ fruit['id'] }}">
+        <nav class="location-filter">
+            <a href="/fruit/{{ fruit['id'] }}" class="{{ 'active' if not selected_location }}">All Costcos</a>
+            {% for loc in locations %}
+                <a href="/fruit/{{ fruit['id'] }}?location={{ loc['id'] }}"
+                   class="{{ 'active' if loc['id'] == selected_location }}">{{ loc["nickname"] }}</a>
+            {% endfor %}
+        </nav>
+
+        {% if recent_avg["num_ratings"] > 0 %}
+            <div class="headline-stat">
+                <div class="meter meter-lead">
+                    <div class="meter-label">
+                        <span>⭐ Overall</span>
+                        <span class="meter-value">{{ recent_avg["avg_overall"] if recent_avg["avg_overall"] is not none else "—" }}/10</span>
+                    </div>
+                    <div class="meter-track">
+                        <div class="meter-fill" style="width: {{ (recent_avg['avg_overall'] or 0) * 10 }}%"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-label">
+                        <span>🍬 Sweetness</span>
+                        <span class="meter-value">{{ recent_avg["avg_sweetness"] }}/10</span>
+                    </div>
+                    <div class="meter-track">
+                        <div class="meter-fill" style="width: {{ (recent_avg['avg_sweetness'] or 0) * 10 }}%"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-label">
+                        <span>💧 Juiciness</span>
+                        <span class="meter-value">{{ recent_avg["avg_juiciness"] }}/10</span>
+                    </div>
+                    <div class="meter-track">
+                        <div class="meter-fill" style="width: {{ (recent_avg['avg_juiciness'] or 0) * 10 }}%"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-label">
+                        <span>✊ Firmness</span>
+                        <span class="meter-value">{{ recent_avg["avg_firmness"] }}/10</span>
+                    </div>
+                    <div class="meter-track">
+                        <div class="meter-fill" style="width: {{ (recent_avg['avg_firmness'] or 0) * 10 }}%"></div>
+                    </div>
+                </div>
+                <p class="meta">{{ recent_avg["num_ratings"] }} rating{{ "s" if recent_avg["num_ratings"] != 1 }} in the last 7 days</p>
+            </div>
         {% else %}
-            <strong>All Costcos</strong>
+            <div class="headline-stat empty-state">
+                <p class="empty-state-emoji">🍽️</p>
+                <p class="blurb">No ratings in the last 7 days</p>
+                <a href="/rate/{{ fruit['id'] }}" class="btn-primary">Be the first</a>
+            </div>
         {% endif %}
-        {% for loc in locations %}
-            ·
-            {% if loc["id"] == selected_location %}
-                <strong>{{ loc["nickname"] }}</strong>
-            {% else %}
-                <a href="/fruit/{{ fruit['id'] }}?location={{ loc['id'] }}">{{ loc["nickname"] }}</a>
-            {% endif %}
-        {% endfor %}
-    </p>
 
-    {% if recent_avg["num_ratings"] > 0 %}
-        <p class="headline-stat">
-            <span class="stat-line">⭐ Overall {{ recent_avg["avg_overall"] if recent_avg["avg_overall"] is not none else "—" }}/10</span>
-            <span class="stat-line">🍬 Sweetness {{ recent_avg["avg_sweetness"] }}/10</span>
-            <span class="stat-line">💧 Juiciness {{ recent_avg["avg_juiciness"] }}/10</span>
-            <span class="stat-line">✊ Firmness {{ recent_avg["avg_firmness"] }}/10</span>
-            <small>({{ recent_avg["num_ratings"] }} rating{{ "s" if recent_avg["num_ratings"] != 1 }} in the last 7 days)</small>
-        </p>
-    {% else %}
-        <p class="headline-stat"><em>No ratings in the last 7 days: </em>
-            <a href="/rate/{{ fruit['id'] }}">be the first</a>!</p>
-    {% endif %}
-
-    <h2>Week by week</h2>
-    {% if weekly %}
-        <table class="weekly-table">
-            <tr>
-                <th>Week of</th>
-                <th>Everyone</th>
-                <th>You</th>
-                <th>Ratings</th>
-            </tr>
-            {% for w in weekly %}
-            {% set mine = my_weekly.get(w["week_start"]) %}
-            <tr>
-                <td data-label="Week of">{{ w["week_start"] | prettydate }}</td>
-                <td data-label="Everyone">
-                     ⭐ {{ w["avg_overall"] if w["avg_overall"] is not none else "—" }} · 🍬 {{ w["avg_sweetness"] }} · 💧 {{ w["avg_juiciness"] }} · ✊ {{ w["avg_firmness"] }}
-                </td>
-                <td data-label="You">
-                    {% if mine %}
-                        ⭐ {{ mine["overall"] if mine["overall"] is not none else "—" }} · 🍬 {{ mine["sweetness"] }} · 💧 {{ mine["juiciness"] }} · ✊ {{ mine["firmness"] }}
-                    {% else %}
-                        —
+        <h2>Week by week</h2>
+        {% if weekly %}
+            <div class="week-list">
+                {% for w in weekly %}
+                {% set mine = my_weekly.get(w["week_start"]) %}
+                <div class="week-card">
+                    <div class="week-card-header">
+                        <span class="week-card-date">{{ w["week_start"] | prettydate }}</span>
+                        <span class="week-card-count">{{ w["num_ratings"] }} rating{{ "s" if w["num_ratings"] != 1 }}</span>
+                    </div>
+                    <div class="week-card-row">
+                        <span class="week-card-label">Everyone</span>
+                        <div class="stat-chips">
+                            <span class="chip">⭐ {{ w["avg_overall"] if w["avg_overall"] is not none else "—" }}</span>
+                            <span class="chip">🍬 {{ w["avg_sweetness"] }}</span>
+                            <span class="chip">💧 {{ w["avg_juiciness"] }}</span>
+                            <span class="chip">✊ {{ w["avg_firmness"] }}</span>
+                        </div>
+                    </div>
+                    {% if session.get('user_id') %}
+                    <div class="week-card-row">
+                        <span class="week-card-label">You</span>
+                        {% if mine %}
+                            <div class="stat-chips">
+                                <span class="chip chip-you">⭐ {{ mine["overall"] if mine["overall"] is not none else "—" }}</span>
+                                <span class="chip chip-you">🍬 {{ mine["sweetness"] }}</span>
+                                <span class="chip chip-you">💧 {{ mine["juiciness"] }}</span>
+                                <span class="chip chip-you">✊ {{ mine["firmness"] }}</span>
+                            </div>
+                        {% else %}
+                            <span class="week-card-empty">Not rated</span>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                </td>
-                <td data-label="Ratings">{{ w["num_ratings"] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>No ratings here yet{% if selected_location %} for this Costco: {% endif %}  <a href="/rate/{{ fruit['id'] }}">be the first to rate</a>!</p>
-    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="blurb">No ratings here yet{% if selected_location %} for this Costco{% endif %} -
+               <a href="/rate/{{ fruit['id'] }}">be the first to rate</a>!</p>
+        {% endif %}
 
-    {% if averages["num_ratings"] > 0 %}
-        <p class="alltime-stat"><small>
-            All-time:
-            ⭐ {{ averages["avg_overall"] if averages["avg_overall"] is not none else "—" }}
-            · 🍬 {{ averages["avg_sweetness"] }}
-            · 💧 {{ averages["avg_juiciness"] }}
-            · ✊ {{ averages["avg_firmness"] }}
-            ({{ averages["num_ratings"] }} ratings)
-        </small></p>
+        {% if averages["num_ratings"] > 0 %}
+            <div class="alltime-summary">
+                <div class="alltime-summary-header">
+                    <span>All-time</span>
+                    <span>{{ averages["num_ratings"] }} rating{{ "s" if averages["num_ratings"] != 1 }}</span>
+                </div>
+                <div class="stat-chips">
+                    <span class="chip">⭐ {{ averages["avg_overall"] if averages["avg_overall"] is not none else "—" }}</span>
+                    <span class="chip">🍬 {{ averages["avg_sweetness"] }}</span>
+                    <span class="chip">💧 {{ averages["avg_juiciness"] }}</span>
+                    <span class="chip">✊ {{ averages["avg_firmness"] }}</span>
+                </div>
+            </div>
 
-        <details>
-            <summary>See individual ratings</summary>
-            <ul>
-            {% for r in ratings %}
-                <li>
+            <details>
+                <summary>See individual ratings</summary>
+                <div class="rating-list">
+                {% for r in ratings %}
                     {% set tier = tier_for(r["rater_count"]) %}
-                    ⭐ {{ r["overall"] if r["overall"] is not none else "—" }} · 🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }} · ✊ {{ r["firmness"] }}
-                    at {{ r["location"] }}
-                    <small>(bought {{ r["purchase_date"] | prettydate }},
-                           eaten {{ r["consumed_date"] | prettydate }}),
-                           {{ tier["emoji"] }} {{ tier["name"] }}</small>
-                </li>
-            {% endfor %}
-            </ul>
-        </details>
-    {% endif %}
+                    <div class="rating-row">
+                        <div class="stat-chips">
+                            <span class="chip">⭐ {{ r["overall"] if r["overall"] is not none else "—" }}</span>
+                            <span class="chip">🍬 {{ r["sweetness"] }}</span>
+                            <span class="chip">💧 {{ r["juiciness"] }}</span>
+                            <span class="chip">✊ {{ r["firmness"] }}</span>
+                        </div>
+                        <p class="rating-meta">
+                            📍 {{ r["location"] }} · bought {{ r["purchase_date"] | prettydate }} ·
+                            eaten {{ r["consumed_date"] | prettydate }} · {{ tier["emoji"] }} {{ tier["name"] }}
+                        </p>
+                    </div>
+                {% endfor %}
+                </div>
+            </details>
+        {% endif %}
 
-    <p><a href="/">← Back to all fruits</a></p>
+        <p><a href="/">← Back to all fruits</a></p>
+    </div>
 {% endblock %}

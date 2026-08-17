@@ -5,15 +5,20 @@
 {% block content %}
     <h1>My Profile</h1>
 
-    <p>
-        {{ my_tier["emoji"] }} <strong>{{ my_tier["name"] }}</strong>
-        : {{ count }} rating{{ "s" if count != 1 }}
+    <div class="tier-card">
+        <p>
+            {{ my_tier["emoji"] }} <strong>{{ my_tier["name"] }}</strong>
+            &middot; {{ count }} rating{{ "s" if count != 1 }}
+        </p>
         {% if next_tier_at %}
-            <small>({{ next_tier_at - count }} more to reach the next tier!)</small>
+            <div class="tier-progress-track">
+                <div class="tier-progress-fill" style="width: {{ (count / next_tier_at * 100) | round(1) }}%"></div>
+            </div>
+            <p class="blurb">{{ next_tier_at - count }} more to reach the next tier</p>
         {% else %}
-            <small>(top tier - 👑 nothing left to climb!)</small>
+            <p class="blurb">Top tier - 👑 nothing left to climb</p>
         {% endif %}
-    </p>
+    </div>
 
     <h2>My ratings</h2>
     {% if ratings %}
@@ -25,6 +30,7 @@
                 {% for r in week_ratings %}
                     <li>
                         <a href="/fruit/{{ r['fruit_id'] }}">{{ r["fruit_emoji"] }} {{ r["fruit_name"] }}</a>:
+                            ⭐ {{ r["overall"] if r["overall"] is not none else "—" }} ·
                             🍬 {{ r["sweetness"] }} · 💧 {{ r["juiciness"] }} · ✊ {{ r["firmness"] }}
                         <small>(bought {{ r["purchase_date"] | prettydate }},
                                eaten {{ r["consumed_date"] | prettydate }})</small>

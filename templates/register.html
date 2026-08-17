@@ -3,28 +3,33 @@
 {% block title %}Register: Fruit Loops{% endblock %}
 
 {% block content %}
-    <h1>Create an account 🍓</h1>
-    <p>Already have an account? <a href="/login">Log in</a></p>
+    <div class="auth-page">
+        <h1>Create an account 🍓</h1>
 
-    {% if error %}
-        <p style="color: red">{{ error }}</p>
-    {% endif %}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
 
-    <form method="POST" action="/register">
-        <label>Username:
-            <input type="text" name="username" required>
-        </label>
-        <br><br>
-        <label>Password:
-            <input type="password" name="password" required>
-        </label>
-        <br><br>
-        <label>Email:
-            <input type="email" name="email" required>
-        </label>
-        <br><br>
-        <button type="submit">Register</button>
-    </form>
+        <form method="POST" action="/register" class="form-card">
+            <div class="field">
+                <label>Username:
+                    <input type="text" name="username" required>
+                </label>
+            </div>
+            <div class="field">
+                <label>Password:
+                    <input type="password" name="password" required>
+                </label>
+            </div>
+            <div class="field">
+                <label>Email:
+                    <input type="email" name="email" required>
+                </label>
+            </div>
+            <button type="submit" class="btn-primary">Register</button>
+        </form>
 
-    <p><a href="/">← Back to fruits</a></p>
+        <p class="auth-footer">Already have an account? <a href="/login">Log in</a></p>
+        <p class="auth-footer"><a href="/">← Back to fruits</a></p>
+    </div>
 {% endblock %}

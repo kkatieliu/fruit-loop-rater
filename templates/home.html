@@ -10,12 +10,6 @@
     </header>
 
     <div class="page-intro">
-        {% if username %}
-            <p>Hi {{ username }}! {{ my_tier["emoji"] }} <small>({{ my_tier["name"] }})</small> | <a href="/profile">My profile</a> · <a href="/logout">Log out</a></p>
-        {% else %}
-            <p><a href="/login">Log in</a> or <a href="/register">create an account</a></p>
-        {% endif %}
-
         <h2>Fruits from the last 7 days 🗓️</h2>
         <p class="legend">⭐ overall rating</p>
     </div>
@@ -40,6 +34,4 @@
         </div>
         {% endfor %}
     </div>
-
-    <p class="feedback"><a href="https://docs.google.com/forms/d/e/1FAIpQLSezVfzeH6Iuj4zHCthRQ-sh6c85TV3kWvAy0750_xcMW0q_Ww/viewform" target="_blank"> 💬 Feedback during early development? We'd love to hear!</a></p>
 {% endblock %}

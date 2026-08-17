@@ -3,26 +3,30 @@
 {% block title %}Log in: Fruit Loops{% endblock %}
 
 {% block content %}
-    <h1>Log in 🍓</h1>
+    <div class="auth-page">
+        <h1>Log in 🍓</h1>
 
-    {% if error %}
-        <p style="color: red">{{ error }}</p>
-    {% endif %}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
 
-    <form method="POST" action="/login">
-        <label>Username:
-            <input type="text" name="username" required>
-        </label>
-        <br><br>
-        <label>Password:
-            <input type="password" name="password" required>
-        </label>
-        <br><br>
-        <button type="submit">Log in</button>
-    </form>
+        <form method="POST" action="/login" class="form-card">
+            <div class="field">
+                <label>Username:
+                    <input type="text" name="username" required>
+                </label>
+            </div>
+            <div class="field">
+                <label>Password:
+                    <input type="password" name="password" required>
+                </label>
+            </div>
+            <button type="submit" class="btn-primary">Log in</button>
+        </form>
 
-    <p>No account yet? <a href="/register">Register here</a></p>
-    <p><a href="/">← Back to fruits</a></p>
+        <p class="auth-footer">No account yet? <a href="/register">Register here</a></p>
+        <p class="auth-footer"><a href="/">← Back to fruits</a></p>
+    </div>
 {% endblock %}
 
 {# this is a Jinja comment that would never sent to the browser #}

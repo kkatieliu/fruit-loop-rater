@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date, timedelta
 import os   # add to the imports at the top
@@ -44,6 +44,28 @@ def get_db():
     db.row_factory = sqlite3.Row
     return db
 
+def rating_slot_count(db, user_id):
+    return db.execute(
+        """SELECT COUNT(*) AS c FROM (
+               SELECT DISTINCT fruit_id, location_id, week_start
+               FROM ratings WHERE user_id = ?
+           )""",
+        (user_id,),
+    ).fetchone()["c"]
+
+@app.context_processor
+def inject_header_tier():
+    if "user_id" not in session:
+        return {"header_tier": None}
+    db = get_db()
+    count = rating_slot_count(db, session["user_id"])
+    db.close()
+    return {"header_tier": tier_for(count)}
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("404.html"), 404
+
 @app.route("/")
 def home():
     db = get_db()
@@ -72,14 +94,7 @@ def home():
 
     my_tier = None
     if "user_id" in session:
-        count = db.execute(
-            """SELECT COUNT(*) AS c FROM (
-                   SELECT DISTINCT fruit_id, location_id, week_start
-                   FROM ratings WHERE user_id = ?
-               )""",
-            (session["user_id"],),
-        ).fetchone()["c"]
-        my_tier = tier_for(count)
+        my_tier = tier_for(rating_slot_count(db, session["user_id"]))
         
     db.close()
     return render_template("home.html", username=session.get("username"), fruits=fruits, my_tier=my_tier)
@@ -93,7 +108,7 @@ def rate(fruit_id):
     fruit = db.execute("SELECT * FROM fruits WHERE id = ?", (fruit_id,)).fetchone()
     if fruit is None:
         db.close()
-        return "Fruit not found", 404
+        abort(404)
     locations = db.execute("SELECT * FROM locations ORDER BY nickname").fetchall()
 
     if request.method == "POST":
@@ -222,9 +237,9 @@ def fruit_detail(fruit_id):
     fruit = db.execute("SELECT * FROM fruits WHERE id = ?", (fruit_id,)).fetchone()
     if fruit is None:
         db.close()
-        return "Fruit not found", 404
+        abort(404)
 
-    locations = db.execute("SELECT * FROM locations ORDER BY nickname").fetchall()  
+    locations = db.execute("SELECT * FROM locations ORDER BY nickname").fetchall()
 
     loc_filter = "AND location_id = ?" if location_id else ""    
     loc_params = (location_id,) if location_id else ()           
@@ -345,7 +360,7 @@ def profile():
     db = get_db()
 
     my_ratings = db.execute(
-        """SELECT r.id AS rating_id, r.sweetness, r.juiciness, r.firmness,
+        """SELECT r.id AS rating_id, r.sweetness, r.juiciness, r.firmness, r.overall,
                   r.purchase_date, r.consumed_date, r.week_start,
                   f.name AS fruit_name, f.emoji AS fruit_emoji, f.id AS fruit_id,
                   l.nickname AS location
@@ -363,13 +378,7 @@ def profile():
         week = r["week_start"]
         by_location.setdefault(loc, {}).setdefault(week, []).append(r)
 
-    count = db.execute(
-        """SELECT COUNT(*) AS c FROM (
-               SELECT DISTINCT fruit_id, location_id, week_start
-               FROM ratings WHERE user_id = ?
-           )""",
-        (session["user_id"],),
-    ).fetchone()["c"]
+    count = rating_slot_count(db, session["user_id"])
     my_tier = tier_for(count)
 
     next_tier_at = None

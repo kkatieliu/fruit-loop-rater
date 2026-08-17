@@ -1,11 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Real-time fruit scores for actual Costcos in Burnaby and Vancouver.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%8D%93</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <title>{% block title %}Fruit Loops{% endblock %}</title>
 </head>
 <body>
-    {% block content %}{% endblock %}
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a href="/" class="brand">🍓 Fruit Loops</a>
+            <nav class="site-nav">
+                {% if session.get('username') %}
+                    <a href="/profile" class="nav-user">
+                        {% if header_tier %}<span class="nav-tier-emoji">{{ header_tier.emoji }}</span>{% endif %}
+                        {{ session['username'] }}
+                    </a>
+                    <a href="/logout" class="nav-link">Log out</a>
+                {% else %}
+                    <a href="/login" class="nav-link">Log in</a>
+                    <a href="/register" class="nav-cta">Sign up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="page">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <p>
+            🍓 Fruit Loops ·
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSezVfzeH6Iuj4zHCthRQ-sh6c85TV3kWvAy0750_xcMW0q_Ww/viewform" target="_blank">Feedback</a>
+        </p>
+    </footer>
+
+    <script src="/static/app.js"></script>
 </body>
 </html>
