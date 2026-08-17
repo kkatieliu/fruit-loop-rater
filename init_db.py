@@ -13,18 +13,19 @@ connection.executescript("""
         emoji TEXT
     );
 
-    -- Runs before the seed INSERT below: renames an already-seeded
-    -- 'Strawberries' row to 'Strawberry' first, so the INSERT OR IGNORE's
-    -- 'Strawberry' row correctly gets skipped as a duplicate instead of
-    -- being created alongside the old row under its old name.
+    -- Runs before the seed INSERT below: renames already-seeded rows to
+    -- their corrected names first, so the INSERT OR IGNORE's corrected
+    -- rows get skipped as duplicates instead of being created alongside
+    -- the old rows under their old names.
     UPDATE fruits SET name = 'Strawberry' WHERE name = 'Strawberries';
+    UPDATE fruits SET name = 'Orange' WHERE name = 'Ogrange';
 
     INSERT OR IGNORE INTO fruits (name, emoji) VALUES
         ('Watermelon', '🍉'),
         ('Strawberry', '🍓'),
         ('Banana', '🍌'),
         ('Tomato', '🍅'),
-        ('Ogrange', '🍊'),
+        ('Orange', '🍊'),
         ('Kiwi', '🥝'),
         ('Pear', '🍐'),
         ('Pineapple', '🍍');

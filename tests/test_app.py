@@ -133,7 +133,7 @@ def test_consumed_before_purchased_rejected(client, db):
 # ---- averaging model: one vote per user, not per raw rating ----
 
 def test_home_page_averages_per_user_not_per_row(client, db):
-    fid = fruit_id(db, "Ogrange")
+    fid = fruit_id(db, "Orange")
     loc = location_id(db, "Brighton")
 
     register(client, username=unique_username("avgA"))
